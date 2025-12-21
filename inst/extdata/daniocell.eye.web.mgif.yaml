@@ -1,0 +1,49 @@
+# DanioCell 
+# Objects downloaded from https://daniocell.nichd.nih.gov 
+# in March 2025
+# https://daniocell.nichd.nih.gov/assets/obj-download/Daniocell2023_SeuratV4.rds
+# https://daniocell.nichd.nih.gov/assets/obj-download/cluster_annotations.csv
+# obs_[tissue].csv.gz created as follows:
+#		seurat_obj <- readRDS("~/data/sc_resources/Daniocell2023_SeuratV4.rds")
+#   dc_cluster <- data.table::fread("~/data/sc_resources/Daniocell2023_SeuratV4/cluster_annotations.csv")
+#		obs <- bind_rows(seurat_obj@reductions$umap@cell.embeddings %>% as_tibble(rownames = 'Barcode') %>% 
+#     mutate(tissue = 'all'), seurat_obj@misc$tissue.umaps %>% bind_rows(.id= 'tissue') %>% as_tibble(rownames = 'Barcode')) 
+# for (i in unique(obs$tissue)){
+#   print(i)
+#   out <- obs |> filter(tissue == i)
+#   out <- out |> left_join(obs, by = 'Barcode') |> 
+#     left_join(dc_cluster |> select(-tissue), by = c('cluster' = 'clust'))
+#   write_csv(out, file = paste0('~/data/sc_resources/mgif/Daniocell2023_SeuratV4/obs_', i, '.csv.gz'))
+# }
+
+# directory path for mgif (should contain thousands of gene files (optionally) with the metadata)
+mgifPath: https://hpc.nih.gov/~mcgaugheyd/mgif/Daniocell2023_SeuratV4/
+
+# Primary tables and core columns
+var:
+  # gene info file
+  file: https://hpc.nih.gov/~mcgaugheyd/mgif/Daniocell2023_SeuratV4/var.csv.gz
+
+quant:
+  # used for the "mgif" csv.gv gene level files in mgifPath
+  # two required columns
+  barcode: barcode
+  expression: expression
+  
+obs:
+  # cell metadata file
+  file: https://hpc.nih.gov/~mcgaugheyd/mgif/Daniocell2023_SeuratV4/DanioCell_eye_20250828_2000hvg_200e_30l.obs.csv.gz
+  columns:
+    # barcode column
+    ### WARNING! This is used to join to the quant$barcode above! #####
+    barcode: V1
+    # first embedding dimension
+    embedding1: umap1
+    # second embedding dimension
+    embedding2: umap2
+    # cell type column
+    celltype: identity.super
+    # cluster column
+    cluster: cluster
+    # total counts for the cell. Used for count norm in visualization.
+    total_counts: nCount_RNA

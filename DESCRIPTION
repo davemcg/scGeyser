@@ -1,0 +1,62 @@
+Package: scGeyser
+Title: single cell gene expression viewer
+Version: 1.00.1
+Authors@R:
+    person(given = "David",
+           family = "McGaughey",
+           role = c("aut", "cre"),
+           email = "mcgaughey@gmail.com",
+           comment=c(ORCID="0000-0002-9224-2888"))
+Description: Lightweight Expression plotter / viewer of SCE, Seurat, and mgif in R. This package provides a quick and easy Shiny-based GUI to investigate single cell datasets.
+License: CC0
+LazyData: false
+biocViews: Software, ShinyApps, GUI, GeneExpression
+Imports:
+    abind,
+    bslib (>= 0.6.0),
+    BiocStyle,
+    circlize,
+    ComplexHeatmap,
+    dplyr,
+    DT,
+    fs,
+    ggbeeswarm,
+    ggplot2,
+    htmltools,
+    HDF5Array,
+    magrittr,
+    matrixStats,
+    purrr,
+    Seurat,
+    shiny,
+    SummarizedExperiment,
+    SingleCellExperiment,
+    tibble,
+    tidyselect,
+    tidyr,
+    shinyjs,
+    tidyverse,
+    yaml,
+    data.table,
+    scattermore,
+    ggrepel,
+    ggh4x,
+    pals,
+    cowplot,
+    rlang,
+    R.utils,
+    shinyFiles
+Suggests:
+    airway,
+    knitr,
+    DESeq2,
+    HDF5Array,
+    rmarkdown,
+    stringr,
+    testthat (>= 3.0.0),
+Config/testthat/edition: 3
+VignetteBuilder: knitr
+Encoding: UTF-8
+URL: https://github.com/davemcg/geyser
+BugReports: https://github.com/davemcg/geyser/issues
+RoxygenNote: 7.3.2

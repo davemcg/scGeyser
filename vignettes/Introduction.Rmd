@@ -1,0 +1,24 @@
+---
+title: "single cell Geyser"
+output: BiocStyle::html_document
+author: 
+  - name: David McGaughey
+    affiliation: National Eye Institute, National Institutes of Health
+date: "`r Sys.Date() `"
+vignette: >
+  %\VignetteIndexEntry{Gene_Expression_Plotting_GUI}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+# Session Info
+```{r}
+sessionInfo()
+```
