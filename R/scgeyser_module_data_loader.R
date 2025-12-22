@@ -218,8 +218,17 @@ dataLoaderServer <- function(id) {
       factor_cols <- names(meta_data)[sapply(meta_data, function(x) is.character(x) || is.factor(x))]
       
       # Update UI selectors with smart defaults
-      updateSelectInput(session, "rdsEmbedding1", choices = numeric_cols, selected = grep("UMAP_1", numeric_cols, value = TRUE, ignore.case = TRUE)[1])
-      updateSelectInput(session, "rdsEmbedding2", choices = numeric_cols, selected = grep("UMAP_2", numeric_cols, value = TRUE, ignore.case = TRUE)[1])
+      find_default <- function(choices, patterns, fallback) {
+        match <- unlist(lapply(patterns, function(p) grep(p, choices, value = TRUE, ignore.case = TRUE)))
+        if (length(match) > 0) return(match[1])
+        if (fallback %in% choices) return(fallback)
+        return(choices[1])
+      }
+      
+      updateSelectInput(session, "rdsEmbedding1", choices = numeric_cols, 
+                        selected = find_default(numeric_cols, c("UMAP_1", "UMAP1", "PC_1"), "UMAP_1"))
+      updateSelectInput(session, "rdsEmbedding2", choices = numeric_cols, 
+                        selected = find_default(numeric_cols, c("UMAP_2", "UMAP2", "PC_2"), "UMAP_2"))
       common_counts <- c("nCount_RNA", "total_counts", "sum")
       updateSelectInput(session, "rdsTotalCounts", choices = numeric_cols, selected = intersect(common_counts, numeric_cols)[1])
       common_clusters <- c("seurat_clusters", "celltype", "cluster")

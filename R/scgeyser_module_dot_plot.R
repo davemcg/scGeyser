@@ -166,9 +166,21 @@ dotPlotServer <- function(id, loaded_data) {
           showNotification(paste("Warning: Could not load data for gene", gene), type = "warning")
           return(NULL)
         }
+        # Pre-select only the necessary columns from metadata to reduce join overhead
+        meta_subset <- loaded_data$obs_data[, c(
+          loaded_data$config$obs$columns$barcode, 
+          input$groupingVar, 
+          loaded_data$config$obs$columns$total_counts
+        ), with = FALSE]
         
-        joined_data <- loaded_data$obs_data %>%
-          left_join(gene_data, by = setNames(loaded_data$config$quant$barcode, loaded_data$config$obs$columns$barcode))
+        joined_data <- merge(meta_subset, gene_data, 
+                             by.x = loaded_data$config$obs$columns$barcode, 
+                             by.y = loaded_data$config$quant$barcode)
+        
+        
+        # joined_data <- loaded_data$obs_data %>%
+        #   left_join(gene_data, by = setNames(loaded_data$config$quant$barcode, 
+        #                                      loaded_data$config$obs$columns$barcode))
         
         # Handle different expression data types
         slot_type <- loaded_data$config$quant$slot

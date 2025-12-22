@@ -375,8 +375,11 @@ umapPlotServer <- function(id, loaded_data) {
         xvar = embed1_col,
         yvar = embed2_col,
         maxpoints = input$numNeighbors,
-        threshold = Inf
+        threshold = 20
       )
+      
+      # Add validation to stop execution if no cells are near the click
+      req(nrow(nearest_cells) > 0)
       
       clicked_cells_data(nearest_cells)
       

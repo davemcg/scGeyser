@@ -22,7 +22,7 @@ get_core_plot_theme <- function() {
       strip.background = element_rect(fill="grey90", linetype = "blank"), 
       strip.text = element_text(face="bold", size = 4),
       plot.caption = element_text(size = 3),
-      legend.position = c(0, 0)
+      legend.position = "right"
     )
   )
 }
