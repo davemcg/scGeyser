@@ -8,7 +8,7 @@
 tableExplorerControlsUI <- function(id) {
   ns <- NS(id)
   tagList(
-    h4("2. Table Options"),
+    h4("Table Options"),
     
     # Grouping variable selection
     selectInput(

@@ -6,10 +6,14 @@
 umapPlotControlsUI <- function(id) {
   ns <- NS(id)
   tagList(
-    h4("2. Plotting Options"),
+    h4("Plotting Options"),
     
     h5("Shared Settings"),
-    numericInput(ns("pointSize"), "Base Point Size:", value = 2.0, min = 0.1, max = 10, step = 0.5),
+    numericInput(ns("pointSize"), "Base Point Size:", 
+                 value = 2.0, 
+                 min = 0.1, 
+                 max = 10, 
+                 step = 0.5),
     
     # New Subsampling Section
     h5("Subsampling"),

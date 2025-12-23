@@ -9,7 +9,7 @@
 expressionPlotControlsUI <- function(id) {
   ns <- NS(id)
   tagList(
-    h4("2. Plotting Options"),
+    h4("Plotting Options"),
     
     # Main plot settings
     selectInput(ns("xaxis"), "1. Group by (X-axis):", choices = NULL),

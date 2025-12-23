@@ -7,8 +7,8 @@
 #' @importFrom shiny NS actionButton br checkboxInput column conditionalPanel
 #' @importFrom shiny downloadButton downloadHandler em eventReactive fluidRow
 #' @importFrom shiny h4 h5 hr HTML icon isolate moduleServer need
-#' @importFrom shiny numericInput fileInput 
-#' @importFrom shiny observeEvent p plotOutput
+#' @importFrom shiny numericInput fileInput  uiOutput
+#' @importFrom shiny observeEvent p plotOutput 
 #' @importFrom shiny reactive reactiveVal renderPlot renderText req
 #' @importFrom shiny selectInput tagList tags updateSelectInput
 #' @importFrom shiny validate verbatimTextOutput showNotification removeNotification
@@ -30,7 +30,7 @@
 #' @import rlang
 #' @import shinyFiles
 #'
-scGeyser <- function() {
+scGeyser <- function(mgif_dir = NULL) {
   # ----------------- UI -----------------
   ui <- bslib::page_navbar(
     shinyjs::useShinyjs(),
@@ -117,7 +117,7 @@ scGeyser <- function() {
       }
     })
     
-    loaded_data <- dataLoaderServer("data_loader")
+    loaded_data <- dataLoaderServer("data_loader", mgif_dir = mgif_dir)
     umapPlotServer("umap_plotter", loaded_data)
     dotPlotServer("dot_plotter", loaded_data)
     expressionPlotServer("expression_plotter", loaded_data)

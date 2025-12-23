@@ -10,7 +10,8 @@
 dataLoaderUI <- function(id) {
   ns <- NS(id)
   tagList(
-    h4("1. Data Source"),
+    
+    h4("User Data"),
     selectInput(ns("inputType"), "Select Input Type",
                 choices = c("MGIF Project" = "mgif",
                             "Seurat or SCE Object (.rds)" = "rds",
@@ -37,7 +38,7 @@ dataLoaderUI <- function(id) {
       tags$strong("Selected folder:"),
       verbatimTextOutput(ns("hdf5Path"), placeholder = TRUE)
     ),
-    
+    uiOutput(ns("local_files_ui")),
     # This UI section will be shown after an RDS or HDF5 file is loaded
     shinyjs::hidden(
       div(id = ns("rds_mapping_div"),
@@ -89,8 +90,10 @@ dataLoaderOutputUI <- function(id) {
 #' @importFrom utils head
 #' @importFrom fs path_home
 #' 
-dataLoaderServer <- function(id) {
+dataLoaderServer <- function(id, mgif_dir = NULL) {
   moduleServer(id, function(input, output, session) {
+    
+    ns <- session$ns
     
     # Reactive values to store loaded data and intermediate objects
     data_out <- reactiveValues(
@@ -103,6 +106,52 @@ dataLoaderServer <- function(id) {
     raw_rds_object <- reactiveVal(NULL) # To hold the unprocessed RDS/HDF5 object
     temp_data_source_name <- reactiveVal(NULL)
     
+    # Render the optional UI only if mgif_dir is provided ---
+    output$local_files_ui <- renderUI({
+      req(mgif_dir)
+      if (!dir.exists(mgif_dir)) return(NULL)
+      
+      # Find all YAML/MGIF files in the folder
+      available_files <- list.files(mgif_dir, 
+                                    pattern = "\\.(yaml|yml|mgif)$", 
+                                    full.names = TRUE, 
+                                    ignore.case = TRUE)
+      
+      if (length(available_files) == 0) return(NULL)
+      
+      names(available_files) <- basename(available_files)
+      # 2. Logic to handle the local file loading
+      observeEvent(input$load_local_btn, {
+        req(input$local_file_select)
+        path <- input$local_file_select
+        
+        tryCatch({
+          # Reuse your MGIF loading logic
+          config <- yaml::read_yaml(path)
+          data_out$config <- config
+          data_out$obs_data <- data.table::fread(config$obs$file)
+          data_out$gene_table <- data.table::fread(config$var$file)
+          
+          mgif_path <- config$mgifPath
+          data_out$get_gene_data <- function(gene_name) {
+            data.table::fread(paste0(mgif_path, '/', gene_name, '.csv.gz'))
+          }
+          
+          data_out$data_source_name <- basename(path)
+          showNotification(paste("Loaded:", basename(path)), type = "message")
+        }, error = function(e) {
+          showModal(modalDialog(title = "Error Loading Local File", tags$pre(e$message)))
+        })
+      })
+      
+      
+      tagList(
+        h4("Computer Datasets"),
+        selectInput(ns("local_file_select"), "Select YAML:", choices = available_files),
+        actionButton(ns("load_local_btn"), "Load Local MGIF", 
+                     class = "btn-primary w-100", icon = icon("hdd"))
+      )
+    })
     # ---- Helper function to extract metadata and all reductions ----
     extract_full_metadata <- function(obj) {
       if (inherits(obj, "Seurat")) {

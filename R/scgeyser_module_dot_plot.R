@@ -9,7 +9,7 @@
 dotPlotControlsUI <- function(id) {
   ns <- NS(id)
   tagList(
-    h4("2. Plotting Options"),
+    h4("Plotting Options"),
     
     # Step 1: Select grouping variable and axis orientation
     selectInput(
