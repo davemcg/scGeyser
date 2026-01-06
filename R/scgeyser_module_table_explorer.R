@@ -81,9 +81,13 @@ tableExplorerServer <- function(id, loaded_data) {
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
     
-    # --- Module Wiring ---
-    # Use the geneTable module for single gene selection
-    selected_gene_r <- geneTableServer("gene_selector", reactive(loaded_data$gene_table))
+    # Pass the loaded_data$config reactive to the geneTable module
+    selected_gene_r <- geneTableServer(
+      "gene_selector", 
+      reactive(loaded_data$gene_table),
+      reactive(loaded_data$config) 
+    )
+    
     
     # --- UI Updates ---
     # Update grouping choices when new data is loaded
@@ -119,13 +123,17 @@ tableExplorerServer <- function(id, loaded_data) {
         selected_gene_r()
       )
       
-      gene_name <- selected_gene_r()
-      validate(need(gene_name, "Please select a gene from the list."))
-      showNotification(paste("Generating summary for", gene_name, "..."), type = "message", duration = 3)
+      # Extract the ID for loading and Display for notification
+      gene_obj <- selected_gene_r()
+      gene_id <- gene_obj$id
+      gene_display <- gene_obj$display
+      
+      validate(need(gene_id, "Please select a gene from the list."))
+      showNotification(paste("Generating summary for", gene_display, "..."), type = "message", duration = 3)
       
       # Load the data for the selected gene
-      gene_data <- loaded_data$get_gene_data(gene_name)
-      validate(need(!is.null(gene_data), paste("Could not load data for gene:", gene_name)))
+      gene_data <- loaded_data$get_gene_data(gene_id)
+      validate(need(!is.null(gene_data), paste("Could not load data for gene:", gene_id)))
       
       total_counts_col <- loaded_data$config$obs$columns$total_counts
       
@@ -176,11 +184,12 @@ tableExplorerServer <- function(id, loaded_data) {
     })
     
     output$geneSummaryTable <- DT::renderDataTable({
+      gene_display <- if(!is.null(selected_gene_r())) selected_gene_r()$display else "Selected Gene"
       DT::datatable(
         gene_summary_r(),
         options = list(pageLength = 25, scrollX = TRUE, info = TRUE),
         rownames = FALSE,
-        caption = paste("Summary for cells expressing", selected_gene_r())
+        caption = paste("Summary for cells expressing", gene_display)
       ) %>% DT::formatRound('mean_expression', 3) 
     })
     

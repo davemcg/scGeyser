@@ -149,6 +149,12 @@ dotPlotServer <- function(id, loaded_data) {
       req(loaded_data$obs_data, input$groupingVar, loaded_data$config)
       
       selection_df <- selected_genes_rv()
+      # Determine display column
+      display_col <- if (!is.null(loaded_data$config$var$active_gene_column)) {
+        loaded_data$config$var$active_gene_column
+      } else {
+        "var_names"
+      }
       
       validate(
         need(nrow(selection_df) > 1, "Validation Error: Please select at least two genes to generate the plot."),
@@ -159,8 +165,11 @@ dotPlotServer <- function(id, loaded_data) {
       
       showNotification("Processing genes...", type = "message", duration = 3)
       
-      dot_plot_data <- purrr::map_dfr(genes_to_load, function(gene) {
-        gene_data <- loaded_data$get_gene_data(gene)
+      dot_plot_data <- purrr::map_dfr(seq_len(nrow(selection_df)), function(i) {
+        gene_id <- selection_df$var_names[i] # File ID
+        gene_display <- selection_df[[display_col]][i] # Plot Label
+        
+        gene_data <- loaded_data$get_gene_data(gene_id)
         
         if (is.null(gene_data)) {
           showNotification(paste("Warning: Could not load data for gene", gene), type = "warning")
@@ -173,14 +182,14 @@ dotPlotServer <- function(id, loaded_data) {
           loaded_data$config$obs$columns$total_counts
         ), with = FALSE]
         
-        joined_data <- merge(meta_subset, gene_data, 
-                             by.x = loaded_data$config$obs$columns$barcode, 
-                             by.y = loaded_data$config$quant$barcode)
+        # joined_data <- merge(meta_subset, gene_data, 
+        #                      by.x = loaded_data$config$obs$columns$barcode, 
+        #                      by.y = loaded_data$config$quant$barcode)
         
-        
-        # joined_data <- loaded_data$obs_data %>%
-        #   left_join(gene_data, by = setNames(loaded_data$config$quant$barcode, 
-        #                                      loaded_data$config$obs$columns$barcode))
+    
+        joined_data <- meta_subset %>%
+          left_join(gene_data, by = setNames(loaded_data$config$quant$barcode,
+                                             loaded_data$config$obs$columns$barcode))
         
         # Handle different expression data types
         slot_type <- loaded_data$config$quant$slot
@@ -201,7 +210,7 @@ dotPlotServer <- function(id, loaded_data) {
             .groups = 'drop'
           ) %>%
           mutate(avg_exp = ifelse(is.nan(avg_exp), 0, avg_exp)) %>%
-          mutate(gene = gene)
+          mutate(gene = gene_display)
       })
       
       validate(need(nrow(dot_plot_data) > 0, "Could not generate plot. Verify that 'var_names' match the gene data filenames."))
@@ -222,7 +231,7 @@ dotPlotServer <- function(id, loaded_data) {
       exp_mat <- as.matrix(exp_mat_dt[, -1]); rownames(exp_mat) <- gene_order
       pct_mat <- as.matrix(pct_mat_dt[, -1]); rownames(pct_mat) <- gene_order
       pct_mat <- pct_mat[rownames(exp_mat), colnames(exp_mat)] # Ensure perfect order
-      
+      cat(mean(pct_mat))
       # 2. Handle axis swapping if requested
       if (isTRUE(input$swapAxes)) {
         exp_mat <- t(exp_mat)
@@ -252,16 +261,17 @@ dotPlotServer <- function(id, loaded_data) {
       } else {
         if (!is.null(slot_type) && slot_type == "data") legend_title <- "Avg. Log-Norm Exp"
         max_exp <- max(exp_mat, na.rm = TRUE)
-        if (max_exp == 0) max_exp <- 1
+        if (max_exp == 0){ max_exp <- 1 }
         col_fun <- circlize::colorRamp2(c(0, max_exp), c("grey90", "#440154FF")) # Viridis
       }
       
       # 5. Custom cell drawing function
+      dot_scale <- 0.8
       cell_fun <- function(j, i, x, y, width, height, fill) {
         if (exp_mat[i, j] > 0 || pct_mat[i, j] > 0) {
           grid::grid.circle(
             x = x, y = y,
-            r = unit(sqrt(pct_mat[i, j] / 100) * 1.5, "mm"),
+            r = unit(sqrt(pct_mat[i, j] / 100) * dot_scale, "mm"),
             gp = grid::gpar(fill = col_fun(exp_mat[i, j]), col = NA)
           )
         }
@@ -296,7 +306,7 @@ dotPlotServer <- function(id, loaded_data) {
         at = c(0, 25, 50, 75, 100),
         type = "points",
         pch = 16,
-        size = unit(sqrt(c(0, 25, 50, 75, 100) / 100) * 3, "mm"),
+        size = unit(sqrt(c(0, 25, 50, 75, 100) / 100) * (dot_scale * 2.5), "mm"),
         legend_gp = gpar(col = "black"),
         title_gp = gpar(fontsize = 3),
         labels_gp = gpar(fontsize = 3)

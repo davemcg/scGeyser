@@ -109,11 +109,19 @@ expressionPlotServer <- function(id, loaded_data) {
     })
     
     observeEvent(input$geneTable_rows_selected, {
-      req(loaded_data$gene_table, input$geneTable_rows_selected)
+      req(loaded_data$gene_table, input$geneTable_rows_selected, loaded_data$config)
+      
+      display_col <- if (!is.null(loaded_data$config$var$active_gene_column) && 
+                         loaded_data$config$var$active_gene_column %in% names(loaded_data$gene_table)) {
+        loaded_data$config$var$active_gene_column
+      } else {
+        "var_names"
+      }
+      
       newly_selected <- loaded_data$gene_table[input$geneTable_rows_selected, ]
       current_selection <- selected_genes_rv()
       combined <- rbind(current_selection, newly_selected)
-      unique_selection <- combined[!duplicated(combined[[1]]), ]
+      unique_selection <- combined[!duplicated(combined[["var_names"]]), ]
       selected_genes_rv(unique_selection)
     }, ignoreNULL = TRUE, ignoreInit = TRUE)
     
@@ -130,7 +138,6 @@ expressionPlotServer <- function(id, loaded_data) {
       req(loaded_data$obs_data, input$xaxis, loaded_data$config)
       
       # Validation for UI inputs
-      # ... (omitted for brevity)
       
       selection_df <- selected_genes_rv()
       validate(
@@ -143,8 +150,22 @@ expressionPlotServer <- function(id, loaded_data) {
       
       grouping_vars <- unique(c(input$xaxis, input$color[input$color != "None"], input$facet[input$facet != "None"]))
       
-      all_gene_data <- purrr::map_dfr(genes_to_load, function(gene) {
-        gene_df <- loaded_data$get_gene_data(gene)
+      # Check if the requested column exists; if not, fallback to var_names
+      display_col <- if (!is.null(loaded_data$config$var$active_gene_column) && 
+                         loaded_data$config$var$active_gene_column %in% names(selection_df)) {
+        loaded_data$config$var$active_gene_column
+      } else {
+        "var_names"
+      }
+      
+      all_gene_data <- purrr::map_dfr(seq_len(nrow(selection_df)), function(i) {
+        gene_id <- selection_df$var_names[i]
+        gene_display <- selection_df[[display_col]][i]
+        
+        # Validation: If display is still NA, use the ID
+        if (is.na(gene_display)) gene_display <- gene_id
+        
+        gene_df <- loaded_data$get_gene_data(gene_id)
         if (is.null(gene_df)) return(NULL)
         
         joined_data <- loaded_data$obs_data %>%
@@ -163,11 +184,11 @@ expressionPlotServer <- function(id, loaded_data) {
         
         final_data %>%
           select(all_of(grouping_vars), scount) %>%
-          mutate(gene = gene)
+          mutate(gene = gene_display)
       })
       
       validate(need(nrow(all_gene_data) > 0, "Could not load data for selected genes."))
-      all_gene_data$gene <- factor(all_gene_data$gene, levels = genes_to_load)
+      all_gene_data$gene <- factor(all_gene_data$gene, levels = unique(all_gene_data$gene))
       
       return(all_gene_data)
     })

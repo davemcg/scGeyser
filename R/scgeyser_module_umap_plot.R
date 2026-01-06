@@ -140,8 +140,11 @@ umapPlotServer <- function(id, loaded_data) {
     gene_to_plot <- reactiveVal(NULL) # Holds the gene selected from the table
     
     #-- Module Wiring ----
-    selected_gene_from_table <- geneTableServer("gene_table_module", reactive(loaded_data$gene_table))
-    
+    selected_gene_from_table <- geneTableServer(
+      "gene_table_module", 
+      reactive(loaded_data$gene_table),
+      reactive(loaded_data$config) # Add this
+    )
     # When a gene is clicked in the table, update our reactive value
     observeEvent(selected_gene_from_table(), {
       gene_to_plot(selected_gene_from_table())
@@ -278,11 +281,11 @@ umapPlotServer <- function(id, loaded_data) {
       
       selected_gene_val <- gene_to_plot()
       
-      if (is.null(selected_gene_val) || selected_gene_val == "") {
+      if (is.null(selected_gene_val) || selected_gene_val$id == "") {
         return(ggplot() + annotate("text", x=0, y=0, label="Select a gene from the table and click 'Generate Gene Plot'.", size=3) + cowplot::theme_cowplot())
       }
       
-      gene_data <- loaded_data$get_gene_data(selected_gene_val)
+      gene_data <- loaded_data$get_gene_data(selected_gene_val$id)
       
       if (is.null(gene_data)) {
         return(ggplot() + annotate("text", x=0, y=0, label=paste("Could not load data for:", selected_gene_val), size=3) + cowplot::theme_cowplot())
@@ -358,7 +361,7 @@ umapPlotServer <- function(id, loaded_data) {
         scattermore::geom_scattermore(color = 'grey80', pointsize = as.numeric(input$pointSize), pixels = c(800,800)) +
         scattermore::geom_scattermore(data = expressing_cells, pointsize = as.numeric(input$pointSize), mapping = color_aes, pixels = c(800,800)) +
         color_scale +
-        ggtitle(selected_gene_val) +
+        ggtitle(selected_gene_val$display) +
         core_plot_theme +
         labs(caption = caption_text)
       
@@ -402,7 +405,7 @@ umapPlotServer <- function(id, loaded_data) {
     #-- Render Outputs ----
     output$selectedGeneDisplay <- renderText({
       validate(need(gene_to_plot(), "Select gene in table below"))
-      gene_to_plot()
+      gene_to_plot()$display
     })
     
     output$metadataPlot <- renderPlot({ metadata_plot_r() }, res = 300)

@@ -8,6 +8,8 @@ dataLoaderServer(id, mgif_dir = NULL)
 }
 \arguments{
 \item{id}{Namespace ID.}
+
+\item{mgif_dir}{Optional local directory for MGIF files.}
 }
 \value{
 A reactive list containing `$config`, `$obs_data`, `$gene_table`, and a data access function `$get_gene_data`.

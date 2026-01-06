@@ -4,7 +4,7 @@
 \alias{geneTableServer}
 \title{Server for the Gene Table Module}
 \usage{
-geneTableServer(id, gene_data)
+geneTableServer(id, gene_data, config)
 }
 \arguments{
 \item{id}{Namespace ID.}
@@ -15,5 +15,5 @@ geneTableServer(id, gene_data)
 A reactive containing the name of the gene selected from the table.
 }
 \description{
-A reusable server component for the gene table that returns the selected gene.
+A reusable server component for the gene table that returns a list of the selected gene (both the file name and the displayed name)
 }
