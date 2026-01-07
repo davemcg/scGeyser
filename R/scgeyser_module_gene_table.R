@@ -16,6 +16,7 @@ geneTableUI <- function(id) {
 #' @description A reusable server component for the gene table that returns a list of the selected gene (both the file name and the displayed name)
 #' @param id Namespace ID.
 #' @param gene_data A reactive data.table of gene information.
+#' @param config The configuration information specifying file inputs and slot information
 #' @importFrom shiny moduleServer req reactive
 #' @importFrom DT renderDataTable datatable
 #' @return A reactive containing the name of the gene selected from the table.

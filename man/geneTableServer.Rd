@@ -10,6 +10,8 @@ geneTableServer(id, gene_data, config)
 \item{id}{Namespace ID.}
 
 \item{gene_data}{A reactive data.table of gene information.}
+
+\item{config}{The configuration information specifying file inputs and slot information}
 }
 \value{
 A reactive containing the name of the gene selected from the table.

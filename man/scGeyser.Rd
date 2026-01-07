@@ -6,6 +6,10 @@
 \usage{
 scGeyser(mgif_dir = NULL)
 }
+\arguments{
+\item{mgif_dir}{Optional directory containing mgif yaml files. If given, then the UI will display 
+the yaml files in a new UI section on the load screen.}
+}
 \description{
 Run the shiny app for single-cell data visualization.
 }

@@ -4,6 +4,8 @@
 #'
 #' @export
 #'
+#' @param mgif_dir Optional directory containing mgif yaml files. If given, then the UI will display 
+#' the yaml files in a new UI section on the load screen.
 #' @importFrom shiny NS actionButton br checkboxInput column conditionalPanel
 #' @importFrom shiny downloadButton downloadHandler em eventReactive fluidRow
 #' @importFrom shiny h4 h5 hr HTML icon isolate moduleServer need
