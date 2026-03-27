@@ -99,6 +99,9 @@ scGeyser <- function(mgif_dir = NULL) {
   
   # ----------------- Server -----------------
   server <- function(input, output, session) {
+    # Set max file upload size to 1GB
+    options(shiny.maxRequestSize = 10000*1024^2)
+    
     observeEvent(input$inputType, {
       if (input$inputType == "rds") {
         if (!requireNamespace("Seurat", quietly = TRUE) || !requireNamespace("SingleCellExperiment", quietly = TRUE)) {
