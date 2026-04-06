@@ -305,7 +305,7 @@ dataLoaderServer <- function(id, mgif_dir = NULL) {
         data_out$gene_table <- if (inherits(obj, "Seurat")) {
           data.table::as.data.table(obj[[Seurat::DefaultAssay(obj)]]@meta.features, keep.rownames = "var_names")
         } else {
-          data.table::as.data.table(SummarizedExperiment::rowData(obj), keep.rownames = "var_names")
+          data.table::as.data.table(as.data.frame(SummarizedExperiment::rowData(obj)), keep.rownames = "var_names")
         }
         
         data_out$get_gene_data <- function(gene_name) {
@@ -314,7 +314,21 @@ dataLoaderServer <- function(id, mgif_dir = NULL) {
           else { SummarizedExperiment::assay(obj, input$rdsAssaySlot)[gene_name,] }
           data.table::data.table(barcode = colnames(obj), expression = as.numeric(expr))
         }
-        data_out$config <- list(obs = list(columns = list(celltype = input$rdsDefaultCluster)))
+        data_out$config <- list(
+          obs = list(
+            columns = list(
+              celltype = input$rdsDefaultCluster,
+              embedding1 = input$rdsEmbedding1,
+              embedding2 = input$rdsEmbedding2,
+              barcode = barcode_col,
+              total_counts = input$rdsTotalCounts
+            )
+          ),
+          quant = list(
+            barcode = "barcode", # Hardcoded to match get_gene_data's return column name
+            slot = input$rdsAssaySlot
+          )
+        )
         data_out$data_source_name <- temp_data_source_name()
       }, error = function(e) {
         showModal(modalDialog(title = "Process Error", tags$pre(e$message)))

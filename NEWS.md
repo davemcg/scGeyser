@@ -1,3 +1,7 @@
+# scGeyser 0.04
+
+Bug fix for SCE / RDS loading
+
 # scGeyser 0.03
 
 Fix bug in dot plot size. Print mgif YAML document on loading screen. 
@@ -11,4 +15,4 @@ Add GUI interface for "preloaded" mgif files (`scGeyser(mgif_dir = '/folder/wher
 # scGeyser 0.01
 
 "scGeyser", a visualization tool for SingleCellExperiment 
-(SCE). Also supports Seurat, hdf5-backed SCE, and the "mgif" format. 
+(SCE). Also supports Seurat, SCE (also hdf5-backed), and the "mgif" format. 
